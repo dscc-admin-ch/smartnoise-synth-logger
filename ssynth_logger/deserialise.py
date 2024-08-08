@@ -70,4 +70,8 @@ def deserialise_constraints(constraints_json: str) -> dict:
     else:
         raise ValueError("Key 'version' not in submitted json request.")
 
-    return json_body["constraints"]
+    deserialised = {}
+    for key, val in json_body["constraints"].items():
+        deserialised[key] = val['type'](**val['params'])
+
+    return deserialised
