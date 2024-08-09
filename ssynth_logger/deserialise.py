@@ -2,7 +2,7 @@ import json
 
 import pkg_resources
 import snsynth
-from ssynth_logger.constants import SSYNTH, SSYNTH_TRANSFORMER
+from ssynth_logger.constants import JsonBodyKey, SSYNTH, SSYNTH_TRANSFORMER
 
 
 class SSynthDecoder(json.JSONDecoder):
@@ -54,30 +54,38 @@ def deserialise_constraints(constraints_json: str) -> dict:
         constraints: DiffPrivLib pipeline
     """
     json_body = json.loads(constraints_json, cls=SSynthDecoder)
-    if "module" in json_body.keys():
-        if json_body["module"] != SSYNTH:
-            raise ValueError(f"JSON 'module' not equal to '{SSYNTH}'")
+    if JsonBodyKey.MODULE in json_body.keys():
+        if json_body[JsonBodyKey.MODULE] != SSYNTH:
+            raise ValueError(
+                f"JSON '{JsonBodyKey.MODULE}' not equal to '{SSYNTH}'"
+            )
     else:
-        raise ValueError("Key 'module' not in submitted json request.")
+        raise ValueError(
+            f"Key '{JsonBodyKey.MODULE}' not in submitted json request."
+        )
 
-    if "version" in json_body.keys():
+    if JsonBodyKey.VERSION in json_body.keys():
         current_version = pkg_resources.get_distribution(SSYNTH).version
-        if json_body["version"] != current_version:
+        if json_body[JsonBodyKey.VERSION] != current_version:
             raise ValueError(
                 f"Requested version does not match available version:"
                 f" {current_version}."
             )
     else:
-        raise ValueError("Key 'version' not in submitted json request.")
+        raise ValueError(
+            f"Key '{JsonBodyKey.VERSION}' not in submitted json request."
+        )
 
     deserialised = {}
-    for key, val in json_body["constraints"].items():
-        if isinstance(val["params"], list):
+    for key, val in json_body[JsonBodyKey.CONSTRAINTS].items():
+        if isinstance(val[JsonBodyKey.PARAM], list):
             tranformer_list = []
-            for t in val["params"]:
-                tranformer_list.append(t["type"](**t["params"]))
-            deserialised[key] = val["type"](tranformer_list)
+            for t in val[JsonBodyKey.PARAM]:
+                tranformer_list.append(
+                    t[JsonBodyKey.TYPE](**t[JsonBodyKey.PARAM])
+                )
+            deserialised[key] = val[JsonBodyKey.TYPE](tranformer_list)
         else:
-            deserialised[key] = val["type"](**val["params"])
+            deserialised[key] = val[JsonBodyKey.TYPE](**val[JsonBodyKey.PARAM])
 
     return deserialised

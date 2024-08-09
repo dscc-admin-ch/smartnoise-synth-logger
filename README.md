@@ -8,6 +8,11 @@ Logger for Smartnoise Synth Transformers
 
 Serialize and deserialize Smartnoise Synth constraints to and from JSON.
 
+## Installation
+Install with pip:
+```python
+pip install smarntoise_synth_logger
+```
 
 ## Example
 

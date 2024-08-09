@@ -2,7 +2,13 @@ import inspect
 import json
 
 import pkg_resources
-from ssynth_logger.constants import SSYNTH, SSYNTH_TRANSFORMER
+from ssynth_logger.constants import (
+    ANON_PARAM,
+    JsonBodyKey,
+    SSYNTH,
+    SSYNTH_TRANSFORMER,
+    Transformers,
+)
 
 
 def get_filtered_params(obj) -> dict:
@@ -15,30 +21,14 @@ def handle_chain_transformer(col_constraints: dict) -> dict:
     """Handle ChainTransformer-specific logic."""
     transformers = col_constraints.transformers
     return {
-        "type": SSYNTH_TRANSFORMER + "ChainTransformer",
-        "params": [
+        JsonBodyKey.TYPE: SSYNTH_TRANSFORMER + Transformers.CHAIN,
+        JsonBodyKey.PARAM: [
             {
-                "type": SSYNTH_TRANSFORMER + t.__class__.__name__,
-                "params": get_filtered_params(t),
+                JsonBodyKey.TYPE: SSYNTH_TRANSFORMER + t.__class__.__name__,
+                JsonBodyKey.PARAM: get_filtered_params(t),
             }
             for t in transformers
         ],
-    }
-
-
-def handle_anonymization_transformer(col_constraints: dict) -> dict:
-    """Handle AnonymizationTransformer-specific logic."""
-    return {
-        "type": SSYNTH_TRANSFORMER + "AnonymizationTransformer",
-        "params": {"fake": col_constraints.fake.__name__},
-    }
-
-
-def handle_default_operator(col_constraints: dict) -> dict:
-    """Handle default operator logic."""
-    return {
-        "type": SSYNTH_TRANSFORMER + col_constraints.__class__.__name__,
-        "params": get_filtered_params(col_constraints),
     }
 
 
@@ -52,29 +42,35 @@ def serialise_constraints(constraints: dict) -> str:
         ValueError: If the input argument is not a SmartnoiseSynth constraint.
 
     Returns:
-        serialised (str): SmartnoiseSynth pipeline as a serialised string
+        serialised (str): SmartnoiseSynth constraints as a serialised string
     """
     if not isinstance(constraints, dict):
         raise ValueError("Input constraints must be an instance of dict")
 
     json_body = {
-        "module": SSYNTH,
-        "version": pkg_resources.get_distribution(SSYNTH).version,
-        "constraints": {},
+        JsonBodyKey.MODULE: SSYNTH,
+        JsonBodyKey.VERSION: pkg_resources.get_distribution(SSYNTH).version,
+        JsonBodyKey.CONSTRAINTS: {},
     }
 
     for col_name, col_constraints in constraints.items():
         operator_name = col_constraints.__class__.__name__
 
-        if operator_name == "ChainTransformer":
+        if operator_name == Transformers.CHAIN:
             transformer_dict = handle_chain_transformer(col_constraints)
-        elif operator_name == "AnonymizationTransformer":
-            transformer_dict = handle_anonymization_transformer(
-                col_constraints
-            )
-        else:
-            transformer_dict = handle_default_operator(col_constraints)
+        elif operator_name == Transformers.ANONIMIZATION:
+            transformer_dict = {
+                JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
+                + Transformers.ANONIMIZATION,
+                JsonBodyKey.PARAM: {ANON_PARAM: col_constraints.fake.__name__},
+            }
+        else:  # default
+            transformer_dict = {
+                JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
+                + col_constraints.__class__.__name__,
+                JsonBodyKey.PARAM: get_filtered_params(col_constraints),
+            }
 
-        json_body["constraints"][col_name] = transformer_dict
+        json_body[JsonBodyKey.CONSTRAINTS][col_name] = transformer_dict
 
     return json.dumps(json_body)
