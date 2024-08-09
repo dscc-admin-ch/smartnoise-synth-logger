@@ -2,7 +2,7 @@ import inspect
 import json
 
 import pkg_resources
-from ssynth_logger.constants import (
+from smartnoise_synth_logger.constants import (
     ANON_PARAM,
     JsonBodyKey,
     SSYNTH,

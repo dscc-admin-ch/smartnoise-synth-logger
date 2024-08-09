@@ -11,8 +11,11 @@ from snsynth.transform import (
     OneHotEncoder,
     StandardScaler,
 )
-from ssynth_logger import deserialise_constraints, serialise_constraints
-from ssynth_logger.constants import SSYNTH
+from smartnoise_synth_logger import (
+    deserialise_constraints,
+    serialise_constraints,
+)
+from smartnoise_synth_logger.constants import SSYNTH
 
 
 def test_anon_serialize():

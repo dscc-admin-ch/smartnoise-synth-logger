@@ -2,7 +2,11 @@ import json
 
 import pkg_resources
 import snsynth
-from ssynth_logger.constants import JsonBodyKey, SSYNTH, SSYNTH_TRANSFORMER
+from smartnoise_synth_logger.constants import (
+    JsonBodyKey,
+    SSYNTH,
+    SSYNTH_TRANSFORMER,
+)
 
 
 class SSynthDecoder(json.JSONDecoder):

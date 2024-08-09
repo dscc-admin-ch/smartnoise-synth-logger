@@ -11,7 +11,7 @@ Serialize and deserialize Smartnoise Synth constraints to and from JSON.
 ## Installation
 Install with pip:
 ```python
-pip install smarntoise_synth_logger
+pip install smartnoise-synth-logger
 ```
 
 ## Example
@@ -58,14 +58,14 @@ constraints = {
 
 ## Serialise
 ```python
-from ssynth_logger import serialise_constraints
+from smartnoise_synth_logger import serialise_constraints
 
 serialised_constraints = serialise_constraints(constraints)
 ```
 
 ## Deserialise
 ```python
-from ssynth_logger import deserialise_constraints
+from smartnoise_synth_logger import deserialise_constraints
 
 deserialised_constraints = deserialise_constraints(serialised_constraints)
 ```

@@ -8,9 +8,9 @@ this_directory = pathlib.Path(__file__).parent
 long_description = (this_directory / "README.md").read_text()
 
 setup(
-    name="ssynth_logger",
+    name="smartnoise_synth_logger",
     packages=find_packages(),
-    version="0.0.1",
+    version="0.0.2",
     description="A logger wrapper for Smartnoise Synth Table Transformer",
     long_description=long_description,
     long_description_content_type="text/markdown",
