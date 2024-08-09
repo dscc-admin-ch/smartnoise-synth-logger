@@ -1,46 +1,66 @@
-# smartnoise_synth_logger
+# Smartnoise Synth Logger
 Logger for Smartnoise Synth Transformers
-¨
-# DiffPrivLib Logger
+
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python](https://img.shields.io/badge/python-3.11-blue)](https://www.python.org/)
-[![ci tests](https://github.com/dscc-admin-ch/diffprivlib-logger/actions/workflows/tests.yml/badge.svg)](https://github.com/dscc-admin-ch/diffprivlib-logger/actions/workflows/tests.yml?query=branch%3Amain)
+[![ci tests](https://github.com/dscc-admin-ch/smartnoise-synth-logger/actions/workflows/tests.yml/badge.svg)](https://github.com/dscc-admin-ch/smartnoise-synth-logger/actions/workflows/tests.yml?query=branch%3Amain)
 
-Serialize and deserialize DiffPrivLib pipelines to and from JSON.
+Serialize and deserialize Smartnoise Synth constraints to and from JSON.
 
-It is inspired from [opendp-logger](https://github.com/opendp/opendp-logger/tree/main) and a first version was made by [Oblivious](https://www.oblivious.com/) for the [UN PET Lab Hackathon 2022](https://petlab.officialstatistics.org/).
 
 ## Example
 
 ```python
-from sklearn.pipeline import Pipeline
-from diffprivlib import models
-
-pipeline = Pipeline(
-    [
-        (
-            "scaler",
-            models.StandardScaler(
-                bounds=([17, 1, 0, 0, 1], [90, 160, 10000, 4356, 99])
-            ),
-        ),
-        ("pca", models.PCA(2, data_norm=5, centered=True)),
-        ("lr", models.LogisticRegression(data_norm=5)),
-    ]
+from snsynth.transform import (
+    AnonymizationTransformer,
+    BinTransformer,
+    ChainTransformer,
+    ClampTransformer,
+    DropTransformer,
+    LabelTransformer,
+    LogTransformer,
+    MinMaxTransformer,
+    OneHotEncoder,
+    StandardScaler,
 )
+
+constraints = {
+    "id": AnonymizationTransformer("email"),
+    "income": ChainTransformer(
+        [
+            LogTransformer(),
+            BinTransformer(bins=20, lower=0, upper=50),
+        ]
+    ),
+    "height": ChainTransformer(
+        [
+            StandardScaler(lower=0, upper=1),
+            BinTransformer(bins=20, lower=0, upper=1),
+        ]
+    ),
+    "weight": ChainTransformer(
+        [ClampTransformer(lower=10, upper=200), BinTransformer(bins=20)]
+    ),
+    "age": MinMaxTransformer(lower=0, upper=100),
+    "sex": ChainTransformer(
+        [LabelTransformer(nullable=True), OneHotEncoder()]
+    ),
+    "rank": LabelTransformer(nullable=False),
+    "job": DropTransformer(),
+}
 ```
 
 ## Serialise
 ```python
-from diffprivlib_logger import serialise_pipeline
+from ssynth_logger import serialise_constraints
 
-serialised_pipeline = serialise_pipeline(pipeline)
+serialised_constraints = serialise_constraints(constraints)
 ```
 
 ## Deserialise
 ```python
-from diffprivlib_logger import deserialise_pipeline
+from ssynth_logger import deserialise_constraints
 
-deserialised_pipeline = serialise_pipeline(serialised_pipeline)
+deserialised_constraints = deserialise_constraints(serialised_constraints)
 ```
