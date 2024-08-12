@@ -31,7 +31,8 @@ from snsynth.transform import (
 )
 
 constraints = {
-    "id": AnonymizationTransformer("email"),
+    "id": AnonymizationTransformer("uuid4"),
+    "email": "email", # also possible
     "income": ChainTransformer(
         [
             LogTransformer(),
