@@ -70,3 +70,7 @@ from smartnoise_synth_logger import deserialise_constraints
 
 deserialised_constraints = deserialise_constraints(serialised_constraints)
 ```
+
+It can now be expected that the `deserialised_constraints` has the same constraints as `constraints`.
+
+NOTE: lambda function in AnonymizationTransformer are not supported.
