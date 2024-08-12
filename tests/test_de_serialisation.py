@@ -29,6 +29,17 @@ def test_anon_serialize():
     assert result_json == expected_json_updated
 
 
+def test_anon_str_serialize():
+    example_constraints = {"id": "email"}
+    result_json = serialise_constraints(example_constraints)
+
+    expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"id": "email"}}"""  # noqa
+    expected_json_updated = expected_json.replace(
+        "1.0.4", pkg_resources.get_distribution(SSYNTH).version
+    )
+    assert result_json == expected_json_updated
+
+
 def test_chain_serialize():
     example_constraints = {
         "income": ChainTransformer(

@@ -82,7 +82,9 @@ def deserialise_constraints(constraints_json: str) -> dict:
 
     deserialised = {}
     for key, val in json_body[JsonBodyKey.CONSTRAINTS].items():
-        if isinstance(val[JsonBodyKey.PARAM], list):
+        if isinstance(val, str):
+            deserialised[key] = val
+        elif isinstance(val[JsonBodyKey.PARAM], list):
             tranformer_list = []
             for t in val[JsonBodyKey.PARAM]:
                 tranformer_list.append(

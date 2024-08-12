@@ -54,23 +54,28 @@ def serialise_constraints(constraints: dict) -> str:
     }
 
     for col_name, col_constraints in constraints.items():
-        operator_name = col_constraints.__class__.__name__
+        if isinstance(col_constraints, str):
+            json_body[JsonBodyKey.CONSTRAINTS][col_name] = col_constraints
+        else:
+            operator_name = col_constraints.__class__.__name__
 
-        if operator_name == Transformers.CHAIN:
-            transformer_dict = handle_chain_transformer(col_constraints)
-        elif operator_name == Transformers.ANONIMIZATION:
-            transformer_dict = {
-                JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
-                + Transformers.ANONIMIZATION,
-                JsonBodyKey.PARAM: {ANON_PARAM: col_constraints.fake.__name__},
-            }
-        else:  # default
-            transformer_dict = {
-                JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
-                + col_constraints.__class__.__name__,
-                JsonBodyKey.PARAM: get_filtered_params(col_constraints),
-            }
+            if operator_name == Transformers.CHAIN:
+                transformer_dict = handle_chain_transformer(col_constraints)
+            elif operator_name == Transformers.ANONIMIZATION:
+                transformer_dict = {
+                    JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
+                    + Transformers.ANONIMIZATION,
+                    JsonBodyKey.PARAM: {
+                        ANON_PARAM: col_constraints.fake.__name__
+                    },
+                }
+            else:  # default
+                transformer_dict = {
+                    JsonBodyKey.TYPE: SSYNTH_TRANSFORMER
+                    + col_constraints.__class__.__name__,
+                    JsonBodyKey.PARAM: get_filtered_params(col_constraints),
+                }
 
-        json_body[JsonBodyKey.CONSTRAINTS][col_name] = transformer_dict
+            json_body[JsonBodyKey.CONSTRAINTS][col_name] = transformer_dict
 
     return json.dumps(json_body)
