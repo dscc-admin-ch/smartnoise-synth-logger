@@ -7,6 +7,7 @@ Logger for Smartnoise Synth Transformers
 [![ci tests](https://github.com/dscc-admin-ch/smartnoise-synth-logger/actions/workflows/tests.yml/badge.svg)](https://github.com/dscc-admin-ch/smartnoise-synth-logger/actions/workflows/tests.yml?query=branch%3Amain)
 
 Serialize and deserialize Smartnoise Synth constraints to and from JSON.
+Constraints as specified in the Smartnoise Synth Transforms documentation: https://docs.smartnoise.org/synth/transforms/index.html with `tt = TableTransformer(constraint)`.
 
 ## Installation
 Install with pip:
@@ -69,6 +70,7 @@ serialised_constraints = serialise_constraints(constraints)
 from smartnoise_synth_logger import deserialise_constraints
 
 deserialised_constraints = deserialise_constraints(serialised_constraints)
+tt = TableTransformer(deserialised_constraints)
 ```
 
 It can now be expected that the `deserialised_constraints` has the same constraints as `constraints`.
