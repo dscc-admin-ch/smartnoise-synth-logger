@@ -2,6 +2,7 @@ from enum import StrEnum
 
 SSYNTH = "smartnoise-synth"
 SSYNTH_TRANSFORMER = "_ssynth_transformer:"
+SSYNTH_DATETIME = "_ssynth_datetime_transformer:"
 
 ANON_PARAM = "fake"
 
@@ -21,3 +22,4 @@ class Transformers(StrEnum):
 
     CHAIN = "ChainTransformer"
     ANONIMIZATION = "AnonymizationTransformer"
+    DATETIME = "DateTimeTransformer"
