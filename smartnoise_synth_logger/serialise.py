@@ -21,8 +21,7 @@ def get_filtered_params(obj) -> dict:
 def handle_chain_transformer(col_constraints: dict) -> dict:
     """Handle ChainTransformer-specific logic."""
     transformers_list = []
-    transformers = col_constraints.transformers
-    for t in transformers:
+    for t in col_constraints.transformers:
         operator_name = t.__class__.__name__
 
         if operator_name == Transformers.DATETIME:
