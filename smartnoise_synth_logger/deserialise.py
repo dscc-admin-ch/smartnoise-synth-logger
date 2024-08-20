@@ -5,6 +5,7 @@ import snsynth
 from smartnoise_synth_logger.constants import (
     JsonBodyKey,
     SSYNTH,
+    SSYNTH_DATETIME,
     SSYNTH_TRANSFORMER,
 )
 
@@ -33,11 +34,19 @@ class SSynthDecoder(json.JSONDecoder):
         """
         for k, v in dct.items():
             if isinstance(v, str):
-                nb_letters = len(SSYNTH_TRANSFORMER)
-                if v[:nb_letters] == SSYNTH_TRANSFORMER:
+                if v[: len(SSYNTH_TRANSFORMER)] == SSYNTH_TRANSFORMER:
                     try:
                         dct[k] = getattr(
-                            snsynth.transform, v[nb_letters:]  # noqa E203
+                            snsynth.transform,
+                            v[len(SSYNTH_TRANSFORMER) :],  # noqa E203
+                        )
+                    except Exception as e:
+                        raise ValueError(e) from e
+                elif v[: len(SSYNTH_DATETIME)] == SSYNTH_DATETIME:
+                    try:
+                        dct[k] = getattr(
+                            snsynth.transform.datetime,
+                            v[len(SSYNTH_DATETIME) :],  # noqa E203
                         )
                     except Exception as e:
                         raise ValueError(e) from e

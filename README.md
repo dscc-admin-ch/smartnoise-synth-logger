@@ -30,6 +30,8 @@ from snsynth.transform import (
     OneHotEncoder,
     StandardScaler,
 )
+from snsynth.transform.datetime import DateTimeTransformer
+
 
 constraints = {
     "id": AnonymizationTransformer("uuid4"),
@@ -55,6 +57,7 @@ constraints = {
     ),
     "rank": LabelTransformer(nullable=False),
     "job": DropTransformer(),
+    "date": DateTimeTransformer(epoch="1993-06-04"),
 }
 ```
 

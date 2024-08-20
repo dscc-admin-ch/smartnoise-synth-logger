@@ -11,6 +11,7 @@ from snsynth.transform import (
     OneHotEncoder,
     StandardScaler,
 )
+from snsynth.transform.datetime import DateTimeTransformer
 from smartnoise_synth_logger import (
     deserialise_constraints,
     serialise_constraints,
@@ -34,6 +35,28 @@ def test_anon_str_serialize():
     result_json = serialise_constraints(example_constraints)
 
     expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"id": "email"}}"""  # noqa
+    expected_json_updated = expected_json.replace(
+        "1.0.4", pkg_resources.get_distribution(SSYNTH).version
+    )
+    assert result_json == expected_json_updated
+
+
+def test_datetime_serialize():
+    # No param
+    example_constraints = {"birthdays": DateTimeTransformer()}
+    result_json = serialise_constraints(example_constraints)
+    expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"birthdays": {"type": "_ssynth_datetime_transformer:DateTimeTransformer", "params": {"epoch": "1970-01-01T00:00:00"}}}}"""  # noqa
+    expected_json_updated = expected_json.replace(
+        "1.0.4", pkg_resources.get_distribution(SSYNTH).version
+    )
+    assert result_json == expected_json_updated
+
+    # Start epoch
+    example_constraints = {
+        "birthdays": DateTimeTransformer(epoch="1900-01-21")
+    }
+    result_json = serialise_constraints(example_constraints)
+    expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"birthdays": {"type": "_ssynth_datetime_transformer:DateTimeTransformer", "params": {"epoch": "1900-01-21T00:00:00"}}}}"""  # noqa
     expected_json_updated = expected_json.replace(
         "1.0.4", pkg_resources.get_distribution(SSYNTH).version
     )
@@ -82,13 +105,10 @@ def test_serialize():
         ),
         "rank": LabelTransformer(nullable=False),
         "job": DropTransformer(),
-        # "date": ChainTransformer(
-        #     [DateTimeTransformer(), MinMaxTransformer(nullable=False)]
-        # ),
+        "date": DateTimeTransformer(epoch="1993-06-04"),
     }
     result_json = serialise_constraints(example_constraints)
-
-    expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"id": {"type": "_ssynth_transformer:AnonymizationTransformer", "params": {"fake": "email"}}, "income": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:LogTransformer", "params": {}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": 0, "upper": 50, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "height": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:StandardScaler", "params": {"lower": 0, "upper": 1, "epsilon": 0.0, "nullable": false, "odometer": null}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": 0, "upper": 1, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "weight": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:ClampTransformer", "params": {"upper": 200, "lower": 10}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": null, "upper": null, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "age": {"type": "_ssynth_transformer:MinMaxTransformer", "params": {"lower": 0, "upper": 100, "epsilon": 0.0, "negative": true, "nullable": false, "odometer": null}}, "sex": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:LabelTransformer", "params": {"nullable": true}}, {"type": "_ssynth_transformer:OneHotEncoder", "params": {}}]}, "rank": {"type": "_ssynth_transformer:LabelTransformer", "params": {"nullable": false}}, "job": {"type": "_ssynth_transformer:DropTransformer", "params": {}}}}"""  # noqa
+    expected_json = """{"module": "smartnoise-synth", "version": "1.0.4", "constraints": {"id": {"type": "_ssynth_transformer:AnonymizationTransformer", "params": {"fake": "email"}}, "income": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:LogTransformer", "params": {}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": 0, "upper": 50, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "height": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:StandardScaler", "params": {"lower": 0, "upper": 1, "epsilon": 0.0, "nullable": false, "odometer": null}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": 0, "upper": 1, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "weight": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:ClampTransformer", "params": {"upper": 200, "lower": 10}}, {"type": "_ssynth_transformer:BinTransformer", "params": {"lower": null, "upper": null, "epsilon": 0.0, "bins": 20, "nullable": false, "odometer": null}}]}, "age": {"type": "_ssynth_transformer:MinMaxTransformer", "params": {"lower": 0, "upper": 100, "epsilon": 0.0, "negative": true, "nullable": false, "odometer": null}}, "sex": {"type": "_ssynth_transformer:ChainTransformer", "params": [{"type": "_ssynth_transformer:LabelTransformer", "params": {"nullable": true}}, {"type": "_ssynth_transformer:OneHotEncoder", "params": {}}]}, "rank": {"type": "_ssynth_transformer:LabelTransformer", "params": {"nullable": false}}, "job": {"type": "_ssynth_transformer:DropTransformer", "params": {}}, "date": {"type": "_ssynth_datetime_transformer:DateTimeTransformer", "params": {"epoch": "1993-06-04T00:00:00"}}}}"""  # noqa
     expected_json_updated = expected_json.replace(
         "1.0.4", pkg_resources.get_distribution(SSYNTH).version
     )
@@ -98,6 +118,20 @@ def test_serialize():
 def test_anon_serialize_deserialise():
     example_constraints = {
         "id": AnonymizationTransformer("ssn"),
+    }
+    serialised = serialise_constraints(example_constraints)
+    deserialised = deserialise_constraints(serialised)
+
+    for (e_k, e_v), (de_k, de_v) in zip(
+        example_constraints.items(), deserialised.items()
+    ):
+        assert e_k == de_k
+        assert e_v.__class__.__name__ == de_v.__class__.__name__
+
+
+def test_datetime_serialize_deserialise():
+    example_constraints = {
+        "birthdays": DateTimeTransformer(epoch="1900-01-21")
     }
     serialised = serialise_constraints(example_constraints)
     deserialised = deserialise_constraints(serialised)
@@ -133,9 +167,7 @@ def test_serialize_deserialise():
         ),
         "rank": LabelTransformer(nullable=False),
         "job": DropTransformer(),
-        # "date": ChainTransformer(
-        #     [DateTimeTransformer(), MinMaxTransformer(nullable=False)]
-        # ),
+        "date": DateTimeTransformer(epoch="1993-06-04"),
     }
     serialised = serialise_constraints(example_constraints)
     deserialised = deserialise_constraints(serialised)
